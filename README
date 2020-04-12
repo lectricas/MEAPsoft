@@ -1,0 +1,331 @@
+MEAPsoft-1.1.1
+
+This is a basic implementation of the MEAPsoft framework that we
+described on 2006-02-27.  It contains a Java implementation of an
+onset detector, a feature extractor, a synthesizer based on Mike's
+mashup generator, as well as a number of different composers.  In
+addition, a sample perl implementation of a composer that just sorts a
+column of feature file is given in the examples directory.  All of
+these tools operate on audio files and two simple text file formats.
+
+The basic idea is to use the Segmenter to segment some audio files,
+and use FeatExtractor to extract some feature description of these
+chunks.  Then use one of the composer tools to operate on these chunks
+(reorder them somehow) and generate an edit decision list which
+Synthesizer then uses to synthesize some audio.  There is more
+information on the MEAP wiki:
+http://works.music.columbia.edu/MEAP/MeapSoft
+and at the MEAPsoft web page:
+http://labrosa.ee.columbia.edu/meapsoft
+
+Documentation for the MEAPsoft GUI can be found in doc/manual.html.
+A quickstart guide can be found in doc/quickstart.html.
+
+
+* Building:
+
+MEAPsoft comes with a pre-built MEAPsoft.jar, so building from source
+is not necessary to run the application.
+
+However, if you want to, you can build MEAPsoft from scratch. Make
+sure you have java and make in your path. Open a terminal, change into
+the src directory and type "make".  You'll see some diagnostic text
+output, and if the build is successful it will create a MEAPsoft.jar
+file in ./bin
+
+
+* Running:
+
+** Graphical interface:
+
+Run "java -jar /path/to/MEAPsoft.jar" to bring up a GUI interface.
+Note that these programs like eating up memory so you might want to
+pass an option like -mx300m to java. MEAPsoft.jar is in the /bin
+directory.
+
+Alternatively you can use the appropriate runme script in the /bin
+directory. Open a terminal, change into the /bin directory, and type
+"runme.bat" (Windows) or "runme.sh" (OSX/Linux) and the GUI application
+should launch.
+
+
+** Command line apps:
+
+You can also run parts of MEAPsoft from the command line.
+
+Just run       
+$ java -cp /path/to/MEAPsoft.jar com.meapsoft.(Segmenter|FeatExtractor|Synthesizer|composers.ComposerName) options
+
+Note that the jar files in the bin directory also need to be in your
+classpath in order for the above command line to work.
+
+Again, these programs like eating up memory (FeatExtractor
+especially), so you might want to pass an option like -mx300m to java.
+
+1. com.meapsoft.Segmenter - Segments an audio file and creates a list
+   of chunks in the form of a MEAP feature file.
+
+Usage: Segmenter [-options] source1.wav source2.mp3 ... 
+
+  where options include:
+  where options include:
+    -o output_file  the file to write the output to (defaults to ./out.segments)
+    -m N      [0]   use mixer N for input
+    -t D.D  [1.0]   onset detector threshold (event detector), tempo multiplier (beat detector)
+    -s D.D  [0.1]   length of smoothing window in seconds for event detector
+    -d              use the old style onset detector (defaults to BeatOnsetDetector)
+    -0              add an onset at the very beginning of the file
+
+
+2. com.meapsoft.FeatExtractor - extracts features from the segments
+   listed in some feature files.
+
+Usage: FeatExtractor [-options] file1.feat file2.feat ... 
+
+  where options include:
+    -o output_file  append features into output file (defaults to input file)
+    -f feat_name    use feat_name features (defaults to AvgMelSpec, can have many -f arguments)
+
+Supported feat_names are: 
+AvgChroma
+AvgChromaScalar
+AvgChunkPower
+AvgFreqSimple
+AvgMelSpec
+AvgMFCC
+AvgPitchSimple
+AvgSpec
+AvgSpecCentroid
+AvgSpecFlatness
+ChunkLength
+ChunkStartTime
+Likelihood
+SpectralStability
+
+
+3. com.meapsoft.Synthesizer - synthesizes a wav from from an EDL file.
+
+Usage: Synthesizer [-options] file.edl 
+
+  where options include:
+    -o output_file  output sound file (defaults to line out)
+
+
+4. com.meapsoft.composers.MashupComposer - try to recreate a song
+   using the closest chunks from chunkdb.feat
+
+Usage: MashupComposer [-options] dest.feat chunkdb.feat 
+
+  where options include:
+    -o output_file  the file to write the output to (defaults to mashup.edl)
+    -i feat_dim     what feature dimentions to use (defaults to all)
+                    where feat_dim is a comma separated list (no spaces)
+                    of integer indices and ranges (e.g. 1-5,7:9,11)
+    -d dist_metric  distance metric to use (defaults to EuclideanDist, can string them together with many -d arguments)
+
+Supported distance metrics are: 
+EuclideanDist
+CosineDist
+    -c command      apply command to all chunks in the EDL output file
+                    Supported commands include: reverse, crossfade(time), overlap(time) (time in seconds)
+
+
+5. com.meapsoft.composers.SortComposer - java implementation of
+   sort_composer.pl, can sort across multiple feature dimensions
+
+Usage: SortComposer [-options] features.feat
+
+  where options include:
+    -o output_file  the file to write the output to (defaults to sorted.edl)
+    -g              debug mode (prints out chunk features on each line of output file)
+    -r              sort in reverse order
+    -i feat_dim     what feature dimentions to use (defaults to all)
+                    where feat_dim is a comma separated list (no spaces)
+                    of integer indices and ranges (e.g. 1-5,7:9,11)
+    -d dist_metric  distance metric to use (defaults to EuclideanDist, can string them together with many -d arguments)
+    -c command      apply command to all chunks in the EDL output file
+                    Supported commands include: reverse, crossfade(time), overlap(time) (time in seconds)
+Supported distance metrics are:
+EuclideanDist
+CosineDist
+    -c command      apply command to all chunks in the EDL output file
+                    Supported commands include: reverse, crossfade(time), overlap(time) (time in seconds), gain(x).
+
+
+6. com.meapsoft.composers.NNComposer - reorder a song's chunks by
+   hopping from each chunk to its nearest neighbor.
+
+Usage: NNComposer [-options] features.feat
+
+  where options include:
+    -o output_file  the file to write the output to (defaults to sorted.edl)
+    -g              debug mode (prints out chunk features on each line of output file)
+    -i feat_dim     what feature dimentions to use (defaults to all)
+                    where feat_dim is a comma separated list (no spaces)
+                    of integer indices and ranges (e.g. 1-5,7:9,11)
+    -d dist_metric  distance metric to use (defaults to EuclideanDist, can string them together with many -d arguments)
+
+Supported distance metrics are:
+EuclideanDist
+CosineDist
+    -c command      apply command to all chunks in the EDL output file
+                    Supported commands include: reverse, crossfade(time), overlap(time) (time in seconds)
+
+
+6. com.meapsoft.composers.BlipComposer - adds a blip after each chunk
+
+Usage: BlipComposer [-options] features.feat 
+
+  where options include:
+    -o output_file  the file to write the output to (defaults to blipped.edl)
+    -f blip_file    the audio file to insert at the beginning of each chunk (defaults to data/blip.wav)
+    -c command      apply command to all chunks in the EDL output file
+                    Supported commands include: reverse, crossfade(time), overlap(time) (time in seconds)
+
+7.  There are loads more composers in the com.meapsoft.composers package...
+
+
+8. Another composer can be found in ./examples/sort_composer.pl - sort
+   over a single feature dimension
+
+   Usage: perl sort_composer.pl options feat_file edl_file command
+     where options include:
+     -d sort_dim   column of the feature file to sort over
+                   (defaults to 3 - first feature dimension)
+     -r 1          to sort in reverse order 
+
+
+9. DataDisplayPanel can be used to visualize the features contained in a feature file
+
+Usage: DataDisplayPanel [-options] features.feat
+
+  where options include:
+    -i feat_dim     what feature dimentions to use (defaults to all)
+                    where feat_dim is a comma separated list (no spaces)
+                    of integer indices and ranges (e.g. 1-5,7:9,11)
+
+
+* File Formats:
+
+  There are two basic file formats.  Comments are just like your
+  favorite scripting language : 
+  # everything to the right of the hash is a comment
+
+  1. Feature file format (output by Segmenter and FeatExtracter, input
+     to composer)
+     
+     Every line is formatted as follows (features are optional, but
+     the parser expects there to be the same number of features on
+     every line in a given file):
+     /path/to/file  start_time(seconds) chunk_length(seconds) feat1 feat2 ...
+
+     e.g.
+       # filename onset_time chunk_length [features]
+       # Features: AvgChunkPower(1)
+       stairway.wav 1.486077070236206 0.12190476059913635 3.1384155179764343E-6
+       stairway.wav 1.60798180103302 0.19736962020397186 2.71758525671205E-6
+       stairway.wav 1.8053514957427979 0.1915646195411682 2.916578754218279E-5
+       stairway.wav 1.9969160556793213 0.49342402815818787 7.191902857682654E-6
+       ...
+
+  2. Edit decision list format (output by composer, input to Synthesizer)
+  
+     Basic line format (commands are optional):
+     dest_time(seconds) /path/to/file start_time(sec) chunk_length(sec) cmd1 ...
+
+     e.g.:
+       0.121904760599136 stairway.wav 1.60798180103302 0.19736962020397186 reverse   
+       0.319274380803108 stairway.wav 1.8053514957427979 0.1915646195411682 reverse  
+       0.510839000344276 stairway.wav 1.9969160556793213 0.49342402815818787 reverse 
+       ...
+
+     The Synthesizer currently supports the following commands:
+       - crossfade(time) - adds a fade to both ends of the chunk and
+         overlaps it with the previous one.
+       - fade(fadein_time, fadeout_time) - fades the chunk in and out
+         with the given fade times.
+       - gain(A) - scales the chunk waveform by A. 
+       - reverse - reverses the chunk in time.
+
+
+* Example:
+
+  See /examples/reorder_stairway.sh and
+  examples/make_psycho_stairway.sh for some code to make some simple
+  compositions.  
+
+
+* More Information:
+
+  Code documentation is available here:
+  Doxygen: http://www.ee.columbia.edu/~ronw/code/MEAPsoft/doc/doxygen/
+  Javadoc: http://www.ee.columbia.edu/~ronw/code/MEAPsoft/doc/javadoc/
+
+  I'm going to maintain this in a Darcs (http://www.darcs.net)
+  repository for now.  Once you have Darcs installed (oh yes, it is
+  even available in fink), just run: 
+  $ darcs get http://www.ee.columbia.edu/~ronw/code/MEAPsoft 
+  to get a local copy of the repository in the current directory.
+  
+  Edit the files as you please.  Run "darcs record" to save any
+  changes to your local repository.  If you have something working
+  that you want to commit to the main repository, just run "darcs
+  send" to email me the patch.
+
+
+* Licensing:
+
+  This software is distributed under the terms of the GNU General
+  Public License version 2.  See the file "COPYING" for details.
+
+  MEAPsoft depends on the Tritonus (http://www.tritonus.org)
+  implementation of the JavaSound API for audio support and on GNU
+  GetOpt for command line argument parsing.  These libraries can be
+  found in the bin directory and are both distributed under the GNU
+  LGPL license.
+
+  Some portions of MEAPsoft (specifically SpectrogramPanel.java and
+  the contents of the util package) have their own licenses.  These
+  licenses are included below.
+
+  ** License for SpectrogramPanel.java:
+
+     Copyright 1999-2004 Carnegie Mellon University.  
+     Portions Copyright 2002-2004 Sun Microsystems, Inc.  
+     Portions Copyright 2002-2004 Mitsubishi Electric Research Laboratories.
+     All Rights Reserved.  Use is subject to license terms.
+     
+     Redistribution and use in source and binary forms, with or without
+     modification, are permitted provided that the following conditions
+     are met:
+     
+     1. Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer. 
+     
+     2. Redistributions in binary form must reproduce the above copyright
+        notice, this list of conditions and the following disclaimer in
+        the documentation and/or other materials provided with the
+        distribution.
+     
+     3. Original authors' names are not deleted.
+     
+     4. The authors' names are not used to endorse or promote products
+        derived from this software without specific prior written
+        permission.
+     
+     This work was supported in part by funding from the Defense Advanced 
+     Research Projects Agency and the National Science Foundation of the 
+     United States of America, the CMU Sphinx Speech Consortium, and
+     Sun Microsystems, Inc.
+     
+     CARNEGIE MELLON UNIVERSITY, SUN MICROSYSTEMS, INC., MITSUBISHI
+     ELECTRONIC RESEARCH LABORATORIES AND THE CONTRIBUTORS TO THIS WORK
+     DISCLAIM ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL
+     IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
+     CARNEGIE MELLON UNIVERSITY, SUN MICROSYSTEMS, INC., MITSUBISHI
+     ELECTRONIC RESEARCH LABORATORIES NOR THE CONTRIBUTORS BE LIABLE FOR
+     ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+     WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+     ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+     OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+     

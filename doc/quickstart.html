@@ -1,0 +1,84 @@
+<H2>MEAPsoft Quick Start Walkthrough</H2>
+<hr WIDTH="100%">
+
+<P>
+This page leads you through using MEAPsoft to rearrange an example file that 
+comes with the package.  We assume that you have 
+<A HREF="download.php">downloaded the package</A>, 
+unpacked it, and run "make" on it (as appropriate for your machine).
+</P>
+
+<P>
+For a more detailed description of the MEAPsoft components, 
+see the <A HREF="manual.php">MEAPsoft Manual</A>.
+</P>
+
+<P>
+We'll do a quick demonstration of how to process a soundfile using the Chris Mann speech file 
+included with the MEAPsoft distribution. We'll analyze the pitch of each segment in the file and 
+then sort those segments from low to high so that we get a nice speech glissando as our output file.
+Click on each panel name (in the bar near the top of the window) to adjust its settings.
+</P>
+
+<TABLE>
+<TR>
+<TD>
+<A HREF="images/segmenter.png"><IMG SRC="images/segmenter.png" ALT="[segmenter screenshot]" WIDTH="380" ALIGN="right"></A>
+</TD>
+<TD>
+<B>segmenter:</B> <TT>chris_mann.wav</TT> should already be set as the input sound file. If not click on the
+"browse" button and locate it (or some other <TT>.wav</TT> file) on your file system. Set the "segment
+sensitivity" to its highest setting -- we want to grab as many small sounds as possible. Click
+on "detect events" -- since this is a soundfile of someone speaking, it doesn't make sense to try
+to extract tempo/beat information. Click "1st event = track start" -- we want to make sure that
+the very first sound in the file is counted as an event. 
+</TD>
+</TR>
+
+<TR>
+<TD>
+<A HREF="images/ftrex.png"><IMG SRC="images/ftrex.png" ALT="[ftr extractor screenshot]" WIDTH="380" ALIGN="right"></A>
+</TD>
+<TD>
+<B>feature extractors:</B> we will sort the file by pitch, so make sure that only "AvgPitchSimple" is 
+selected. 
+</TD>
+</TR>
+
+<TR>
+<TD>
+<A HREF="images/composer.png"><IMG SRC="images/composer.png" ALT="[composer screenshot]" WIDTH="380" ALIGN="right"></A>
+</TD>
+<TD>
+<B>composers:</B> make sure that "simple sort" is selected. Click "low to high" so that the pitches
+are sorted from low to high. Click "apply fade in/out" and "crossfade" so that we get nice
+transitions between speech segments. Set the "fade length (ms)" to 10ms.
+</TD>
+</TR>
+
+<TR>
+<TD>
+<A HREF="images/synthesizer.png"><IMG SRC="images/synthesizer.png" ALT="[synthesizer screenshot]" WIDTH="380" ALIGN="right"></A>
+</TD>
+<TD>
+<B>synthesizer:</B> nothing to do here! Just click the "go!" button and wait for processing to complete.
+When it's finished, click the "listen" button or find the output sound file in your
+MEAPsoft/data directory. You should hear the <A HREF="http://labrosa.ee.columbia.edu/meapsoft/chris_mann.wav.MEAPED.wav">speech 
+sounds sorted by pitch</A>. You can also click on the "launch visualizer" button to explore the data visually.
+</TD>
+</TR>
+
+<TR>
+<TD>
+<A HREF="images/visualizer.png"><IMG SRC="images/visualizer.png" ALT="[visualizer screenshot]" WIDTH="380" ALIGN="right"></A>
+</TD>
+<TD>
+<B>visualizer:</B> The "segment order" visualizer will open when you press "launch visualizer". At the top of the screen are 
+the chunks from the original .feat file and on the bottom are the composed chunks in the .edl file). The pitch of each chunk is 
+mapped to its color, and you can clearly see that the composed chunks have been sorted from high pitch to low. Click "select all" 
+to see the connection between the .feat chunks and the .edl chunks.</A>.
+</TD>
+</TR>
+
+</TABLE>
+

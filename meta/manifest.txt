@@ -1,0 +1,2 @@
+Main-Class: com.meapsoft.gui.MEAPsoftGUI
+Class-Path: getopt-1.0.12.jar tritonus_misc.jar tritonus_share.jar tritonus_mp3.jar javalayer.jar
